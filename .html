@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://www.tunasharapan.info/official/wp-content/uploads/2018/10/cropped-512X512-32x32.png" sizes="32x32">
+   <link rel="icon" href="https://www.tunasharapan.info/official/wp-content/uploads/2018/10/cropped-512X512-192x192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="https://www.tunasharapan.info/official/wp-content/uploads/2018/10/cropped-512X512-180x180.png">
+    <title>Data Siswa Smk Telekomunikasi Tunas Harapan</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #74ebd5, #9face6);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200vh;
+            overflow-y: scroll;
+        }
+
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 12px; /* Menambahkan sudut melengkung */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 1px solid #000;
+            border-radius: 6px; /* Menambahkan sudut melengkung */
+            font-family: 'Poppins', sans-serif;
+        }
+
+        input::placeholder,
+        select::placeholder {
+            text-align: center;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .label-group {
+            text-align: left;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        #studentTable {
+            width: 80%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            table-layout: fixed; /* Fixed layout for consistent column width */
+        }
+
+        #studentTable th,
+        #studentTable td {
+            border: 1px solid #000;
+            padding: 10px;
+            text-align: center;
+            background-color: #f2f2f2;
+            white-space: nowrap; /* Prevent text wrapping */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Display ellipsis (...) for overflowed content */
+        }
+
+        #noDataMessage {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .edit-btn:hover,
+        .delete-btn:hover {
+            background-color: #0b7dda;
+        }
+
+        .action-buttons {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+       <title>Data Siswa Smk Telekomunikasi Runas Hrapan</title> 
+       <h1 style="margin-bottom: 20px;">Login</h1>
+        <form id="loginForm" action="#" method="post">
+            <div class="label-group">
+                <label for="name">Nama:</label>
+                <input type="text" id="name" name="name" placeholder="Masukkan nama Anda" required>
+            </div>
+
+            <div class="label-group">
+                <label for="class">Kelas:</label>
+                <select id="class" name="class" required>
+                    <option value="XI-A">XI-A</option>
+                    <option value="XI-B">XI-B</option>
+                    <option value="XI-C">XI-C</option>
+                    <option value="XI-D">XI-D</option>
+                    <option value="XI-E">XI-E</option>
+                    <option value="XI-F">XI-F</option>
+                    <option value="XI-G">XI-G</option>
+                    <option value="XI-H">XI-H</option>
+                    <option value="XI-I">XI-I</option>
+                    <option value="XI-J">XI-J</option>
+                    <option value="XI-K">XI-K</option>
+                </select>
+            </div>
+
+            <div class="label-group">
+                <label for="absen">Absen:</label>
+                <input type="number" id="absen" name="absen" placeholder="Masukkan absen Anda (1-27)" required min="1" max="27">
+            </div>
+
+            <div class="label-group">
+                <label for="group">Kelompok:</label>
+                <input type="number" id="group" name="group" placeholder="Masukkan kelompok Anda (1-10)" required min="1" max="10">
+            </div>
+
+            <button type="button" onclick="submitForm()">Login</button>
+        </form>
+    </div>
+
+    <table id="studentTable">
+        <thead>
+            <tr>
+                <th>Nama</th>
+                <th>Kelas</th>
+                <th>Absen</th>
+                <th>Kelompok</th>
+                <th>Waktu</th>
+                <th>Fitur</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Data siswa akan ditampilkan di sini -->
+        </tbody>
+    </table>
+
+    <div id="noDataMessage">Belum ada data siswa</div>
+
+    <script>
+        var isEditing = false; // Menandakan apakah sedang dalam mode edit
+        var editedRowIndex; // Menyimpan indeks baris yang sedang di-edit
+
+        function submitForm() {
+            var name = document.getElementById('name').value;
+            var className = document.getElementById('class').value;
+            var absen = document.getElementById('absen').value;
+            var group = document.getElementById('group').value;
+
+            // Validasi data tidak boleh kosong
+            if (!name || !className || !absen || !group) {
+                alert('Mohon isi semua data sebelum login.');
+                return;
+            }
+
+            // Validasi absen harus berada dalam rentang 1-27
+            if (isNaN(absen) || absen < 1 || absen > 27) {
+                alert('Absen harus berada dalam rentang 1-27.');
+                return;
+            }
+
+            // Validasi kelompok harus berada dalam rentang 1-10
+            if (isNaN(group) || group < 1 || group > 10) {
+                alert('Kelompok harus berada dalam rentang 1-10.');
+                return;
+            }
+
+            // Validasi nama harus diisi
+            if (name.trim() === '') {
+                alert('Mohon isi nama sebelum login.');
+                return;
+            }
+
+            var tableBody = document.getElementById('tableBody');
+            var currentTime = new Date().toLocaleString();
+
+            if (isEditing && editedRowIndex !== undefined) {
+                // Jika sedang dalam mode edit, perbarui data di baris yang sedang di-edit
+                var editedRow = tableBody.rows[editedRowIndex];
+                editedRow.cells[0].innerHTML = name;
+                editedRow.cells[1].innerHTML = className;
+                editedRow.cells[2].innerHTML = absen;
+                editedRow.cells[3].innerHTML = group;
+                editedRow.cells[4].innerHTML = currentTime; // Tambahkan kolom waktu
+                isEditing = false; // Keluar dari mode edit setelah menggunakan baris yang sudah ada
+            } else {
+                // Jika bukan mode edit, tambahkan baris baru ke paling atas tabel
+                var newRow = tableBody.insertRow(0);
+                var cell1 = newRow.insertCell(0);
+                var cell2 = newRow.insertCell(1);
+                var cell3 = newRow.insertCell(2);
+                var cell4 = newRow.insertCell(3);
+                var cell5 = newRow.insertCell(4);
+                var cell6 = newRow.insertCell(5);
+
+                cell1.innerHTML = name;
+                cell2.innerHTML = className;
+                cell3.innerHTML = absen;
+                cell4.innerHTML = group;
+                cell5.innerHTML = currentTime; // Tambahkan kolom waktu
+                cell6.innerHTML = '<button class="edit-btn" onclick="editRow(this)">Edit</button> <button class="delete-btn" onclick="deleteRow(this)">Hapus</button>';
+
+                // Perbarui pesan jika tabel tidak kosong
+                if (tableBody.rows.length > 0) {
+                    noDataMessage.style.display = 'none';
+                }
+            }
+
+            // Reset formulir setelah input
+            document.getElementById('loginForm').reset();
+        }
+
+        function deleteRow(button) {
+            var row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+
+            // Tampilkan pesan jika tabel kosong
+            var tableBody = document.getElementById('tableBody');
+            var noDataMessage = document.getElementById('noDataMessage');
+
+            if (tableBody.rows.length === 0) {
+                noDataMessage.style.display = 'block';
+            }
+        }
+
+        function editRow(button) {
+            var row = button.parentNode.parentNode;
+            var cells = row.getElementsByTagName('td');
+
+            // Isi formulir dengan data yang akan di-edit
+            document.getElementById('name').value = cells[0].innerHTML;
+            document.getElementById('class').value = cells[1].innerHTML;
+            document.getElementById('absen').value = cells[2].innerHTML;
+            document.getElementById('group').value = cells[3].innerHTML;
+
+            // Reset variabel isEditing menjadi false
+            isEditing = false;
+            editedRowIndex = undefined;
+
+            // Hapus baris yang lama
+            row.parentNode.removeChild(row);
+        }
+    </script>
+</body>
+
+</html>
